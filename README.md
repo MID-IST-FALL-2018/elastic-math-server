@@ -1,4 +1,4 @@
-# Elastic Mathematical Server
+# Elastic Mathematics Server
 
 Your task in this assignment is to implement a server that is able to perform some mathematical binary operations (concretely: addition, subtraction and multiplication).
 The server must have the following features:
