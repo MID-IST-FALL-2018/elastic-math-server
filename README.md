@@ -123,4 +123,4 @@ $ mvn test -Dtest=ElasticServerTests
 
 ### Makefile
 
-There is also a Makefile in the repository which you can use to compile and run `make run`, only compile `make compile`, and run the unit test `make test_elastic_server`.
+There is also a Makefile in the repository which you can use to: compile and run (`make run`), only compile (`make compile`), and run the unit test (`make test_elastic_server`).
