@@ -100,6 +100,7 @@ The skeleton of this class contains the implementation of the operations `SUM`, 
 In order to run the code we use the Java project management tool [Apache Maven](https://maven.apache.org/).
 A `pom.xml` file including all required dependencies and plugins is already provided. Therefore, it is not necessary to update this file.
 Note that the commands below are for Unix based systems.
+The following commands must be executed under the directory `akka-elastic-math-server/`.
 
 In order to compile and execute you can run:
 ```bash
