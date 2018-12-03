@@ -6,7 +6,7 @@ The server must have the following features
 1. Parallelism - The server must be able to process many operations in parallel.
 2. Elasticity - The server must be able to reduce/increase the amount of resources that it uses depending on how many operations are requested.
 
-The operations are submitted by clients that you must implemented as well. A client has a list of tasks that submits to the server and wait for the answer.
+The operations are submitted by clients that you must implement as well. A client has a list of tasks that submits to the server and wait for the answer.
 
 ## Architecture
 
@@ -15,28 +15,50 @@ More precisely, **you must use the [Akka library for Java](https://akka.io)** to
 
 The figure below depicts a high level overview of the architecture of your application.
 
+<center>
+
 ![Architecture](images/architecture.svg)
 
-In the figure above, circles represent the different actors in the system (clients, server and workers), arrows model the allowed flows of communication.
-The systems is composed by *n* clients that have a lists of tasks (mathematical operations) to be computed by the server.
+</center>
+
+In the figure, circles represent the different actors in the system (clients, server and workers), arrows model the allowed flows of communication.
+The system is composed by *n* clients that have a lists of tasks (mathematical operations) to be computed by the server.
 For each task, the clients submit a a request to the server.
 The server keeps track of a list of workers which perform the tasks requested by the clients.
 When the server receives a task it checks whether there is an available worker, and, if so, it assigns the task to the worker.
 Otherwise, the server marks the task as pending so that it can be performed in the future by an available worker.
 The amount of workers depends on the workload in the server.
-The server has a `min` and `max` number of workers that can be created.
-The system will always have at least `min` workers and at most `max` workers.
-When a task is submitted, if there are no workers available, but the amount of active workers (workers computing some operation) `max` have not reached, then the server is allowed to create a new worker.
-Every `tick` seconds, the server must check whether there are idle workers (i.e., workers not computing any operation), if there are more than `min`, then at worker must be terminated.
-This processes can be repeated until there are `min` workers in the system.
+The server has a *min* and *max* number of workers that can be created.
+The system will always have at least *min* workers and at most *max* workers.
+When a task is submitted, if there are no workers available, but the amount of active workers (workers computing some operation) have not reached *max*, then the server is allowed to create a new worker.
+The server is also parametrised by a variable *tick* indicating an amount of time in seconds.
+Every *tick* seconds, the server must check whether there are idle workers (i.e., workers not computing any operation), if there are more than *min*, then a worker must be terminated.
+This processes can be repeated until there are *min* workers in the system.
 
+### Source code overview
+
+In order to better understand the requirements it is advisable to fully understand the code skeleton provided.
+Here we provide a simple explanation of each file:
+
+* `Task.java` - This class are use to define task to be computed. Additionally, the `enum`, `BinaryOperation` is defined. This `enum` is used to specify the available operations that can be computed.
+
+* `ClientTask.java` - This class extends `Task`, with the result of the task and flag indicating whether the task is done.
+
+* `Client.java` - It is the actor class for clients. It contains a list of `ClientTask` which represents the tasks that the client will ask the server to compute.
+
+* `Server.java` - It is the actor class for th server. It contains three integer variables, `max` (maximum number of workers), `min` (minimum number of workers) and `tick` (time in seconds to check the amount of idle workers).
+
+* `Worker.java` - It is the actor class for workers. It contains the implementation of the binary operations in `BinaryOperation`.
+
+
+* `Main.java` - Entry point of the program. It simply creates a clients and a server and sends to the client a `ClientStart` message, which is use to indicate the client to start processing its tasks.
 
 
 ## Requirements
 
 ### Client
 
-Clients are modelled as Akka actors. They have a list of `ClientTask`. A `ClientTask` is an object that contains a `BinaryOperation` (which can be `SUM`, `SUB` or `MUL`), two parameters `x` and `y`, the `result` of the binary operation, and a boolean flag `done` which indicates whether the task has been done.
+Clients are modelled as Akka actors. They have a list of `ClientTask`. A `ClientTask` is an object that contains a `BinaryOperation` (which is an `enum` with the values `SUM`, `SUB` or `MUL` defined withing the `Task.java` class), two parameters `x` and `y`, the `result` of the binary operation, and a boolean flag `done` which indicates whether the task has been done.
 
 
 * For each request to the server, clients can send at most one task from their list of tasks. For instance, if the list of tasks is composed by 3 tasks, three requests must be sent to the server.
@@ -66,7 +88,39 @@ When a worker finishes processing a task, the server must make sure that, if the
 
 ### Worker
 
+Workers is modelled as an Akka actors.
+The skeleton of this class contains the implementation of the operations `SUM`, `SUB` and `MUL`. The implementation of these operations cannot be modified.
+
+
 * Workers may receive messages from the server, but cannot send messages to the server. Moreover, workers can send messages to clients.
 
-<!-- ## Running the code
-### Correctness unit test -->
+## Running the code
+
+In order to run the code we use the Java project management tool [Apache Maven](https://maven.apache.org/).
+A `pom.xml` file including all required dependencies and plugins is already provided.
+Therefore, it is not necessary to update this file.
+Note that the commands below are for Unix based systems.
+
+In order to compile and execute you can run:
+```bash
+$ mvn compile exec:exec
+```
+
+
+If you would like to simply compile the code, you can run:
+```bash
+$ mvn compiler:compile
+```
+
+### Correctness unit test
+
+Finally, we provide a very simple unit test that, after a client has requested all the tasks in `List<ClientTask> tasks`, it waits for all `done` flags to become `true` and checks that the _order_ and _results_.
+
+In order to run the test may use the following command:
+```bash
+$ mvn test -Dtest=ElasticServerTests
+```
+
+### Makefile
+
+There is also a Makefile in the repository which you can use to compile and run `make run`, only compile `make compile`, and run the unit test `make test_elastic_server`.
