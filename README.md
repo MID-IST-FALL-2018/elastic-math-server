@@ -15,11 +15,11 @@ More precisely, **you must use the [Akka library for Java](https://akka.io)** to
 
 The figure below depicts a high level overview of the architecture of your application.
 
-<center>
+<br>
 
-![Architecture](images/architecture.svg)
+<div style="text-align:center"><img src ="images/architecture.svg"/></div>
 
-</center>
+<br>
 
 In the figure, circles represent the different actors in the system (clients, server and workers), arrows model the allowed flows of communication.
 The system is composed by *n* clients that have a lists of tasks (mathematical operations) to be computed by the server.
