@@ -1,10 +1,10 @@
 # Elastic Mathematical Server
 
-Your task in this assignment is to implement an server that is able to perform some mathematical binary operations (concretely: addition, subtraction and multiplication).
-The server must have the following features
+Your task in this assignment is to implement a server that is able to perform some mathematical binary operations (concretely: addition, subtraction and multiplication).
+The server must have the following features:
 
-1. Parallelism - The server must be able to process many operations in parallel.
-2. Elasticity - The server must be able to reduce/increase the amount of resources that it uses depending on how many operations are requested.
+1. *Parallelism* - The server must be able to process many operations in parallel.
+2. *Elasticity* - The server must be able to reduce/increase the amount of resources that it uses to compute the operations depending on how many operations are requested.
 
 The operations are submitted by clients that you must implement as well. A client has a list of tasks that submits to the server and wait for the answer.
 
@@ -38,9 +38,10 @@ This processes can be repeated until there are *min* workers in the system.
 ### Source code overview
 
 In order to better understand the requirements it is advisable to fully understand the code skeleton provided.
+So please spend some time going through the code.
 Here we provide a simple explanation of each file:
 
-* `Task.java` - This class are use to define task to be computed. Additionally, the `enum`, `BinaryOperation` is defined. This `enum` is used to specify the available operations that can be computed.
+* `Task.java` - This class are use to define task to be computed. Additionally, the `enum` `BinaryOperation` is defined. This `enum` is used to specify the available operations that can be computed, i.e., `SUM`, `SUB` and `MUL`.
 
 * `ClientTask.java` - This class extends `Task`, with the result of the task and flag indicating whether the task is done.
 
@@ -51,7 +52,7 @@ Here we provide a simple explanation of each file:
 * `Worker.java` - It is the actor class for workers. It contains the implementation of the binary operations in `BinaryOperation`.
 
 
-* `Main.java` - Entry point of the program. It simply creates a clients and a server and sends to the client a `ClientStart` message, which is use to indicate the client to start processing its tasks.
+* `Main.java` - Entry point of the program. It simply creates a client (together with its list of tasks) and a server and sends to the client a `ClientStart` message, which is used to indicate the client to start processing its tasks.
 
 
 ## Requirements
@@ -61,7 +62,7 @@ Here we provide a simple explanation of each file:
 Clients are modelled as Akka actors. They have a list of `ClientTask`. A `ClientTask` is an object that contains a `BinaryOperation` (which is an `enum` with the values `SUM`, `SUB` or `MUL` defined withing the `Task.java` class), two parameters `x` and `y`, the `result` of the binary operation, and a boolean flag `done` which indicates whether the task has been done.
 
 
-* For each request to the server, clients can send at most one task from their list of tasks. For instance, if the list of tasks is composed by 3 tasks, three requests must be sent to the server.
+* For each request to the server, clients can send at most one task from their list of tasks. In other words, it is not allowed to send the whole list of tasks to the server in one message. For instance, if the list of tasks is composed by 3 tasks, three different messages must be sent to the server.
 
 * There are no assumptions about the `id` of the tasks lists. For instance, two tasks from different clients may have the same `id`.
 
@@ -70,7 +71,7 @@ Clients are modelled as Akka actors. They have a list of `ClientTask`. A `Client
 * There can be an unbounded number of clients in the system.
 
 * The results of the submitted tasks must stored in the same list as when they are initialised (variable `private List<ClientTask> tasks` in `Client.java`) and **in the same order as when they were requested**. For instance, if the list of tasks is `[1+2,3-2]` the list of tasks after processing must be `[3,1]`. If after submitting the tasks, the resulting list is, e.g., `[1,3]`, the result is considered as incorrect.
-Note that in this example I am using a simplification of `ClientTask` objects as the should include `id`, the flag `done` and so on.
+Note that, in this example, we are using a simplification of `ClientTask` objects as they should include `id`, the flag `done` and so on.
 
 ### Server
 
@@ -79,7 +80,7 @@ The minimum elements of the server state are: the minimum `min` and maximum `max
 
 * The server may receive messages from clients but cannot send messages to clients.
 
-* The amount of workers depends on the submitted tasks. At any point in time there can be at most `max` workers and at least `min` workers. When a task is submitted, if there are no available workers and the number of active workers is equal to `max` a new worker may be created. Also, every `tick` seconds, the amount of idle workers must be revise, if the number of idle workers is greater than `min`, then a worker must be terminated.
+* The amount of workers depends on the submitted tasks. At any point in time there can be at most `max` workers and at least `min` workers. When a task is submitted, if there are no available workers and the number of active workers is equal to `max` a new worker may be created. Also, every `tick` seconds, the amount of idle workers must be revised, if the number of idle workers is greater than `min`, then a worker must be terminated.
 
 * If a task request is received, the amount of active workers is equal to `max`, and none of the workers can currently work on the task, then the task must be set as pending.
 When a worker finishes processing a task, the server must make sure that, if there are pending task, the worker will immediately work in one of them.
@@ -88,7 +89,7 @@ When a worker finishes processing a task, the server must make sure that, if the
 
 ### Worker
 
-Workers is modelled as an Akka actors.
+Workers are modelled as an Akka actors.
 The skeleton of this class contains the implementation of the operations `SUM`, `SUB` and `MUL`. The implementation of these operations cannot be modified.
 
 
@@ -97,8 +98,7 @@ The skeleton of this class contains the implementation of the operations `SUM`, 
 ## Running the code
 
 In order to run the code we use the Java project management tool [Apache Maven](https://maven.apache.org/).
-A `pom.xml` file including all required dependencies and plugins is already provided.
-Therefore, it is not necessary to update this file.
+A `pom.xml` file including all required dependencies and plugins is already provided. Therefore, it is not necessary to update this file.
 Note that the commands below are for Unix based systems.
 
 In order to compile and execute you can run:
@@ -114,9 +114,9 @@ $ mvn compiler:compile
 
 ### Correctness unit test
 
-Finally, we provide a very simple unit test that, after a client has requested all the tasks in `List<ClientTask> tasks`, it waits for all `done` flags to become `true` and checks that the _order_ and _results_.
+We provide a very simple unit test that, after a client has requested all the tasks in `List<ClientTask> tasks`, it waits for all `done` flags to become `true` and checks that the position of the tasks in the list have not changed and the results of each task are correct.
 
-In order to run the test may use the following command:
+In order to run the test you may use the following command:
 ```bash
 $ mvn test -Dtest=ElasticServerTests
 ```
