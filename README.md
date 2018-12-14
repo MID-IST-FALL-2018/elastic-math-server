@@ -93,7 +93,7 @@ Workers are modelled as an Akka actors.
 The skeleton of this class contains the implementation of the operations `SUM`, `SUB` and `MUL`. The implementation of these operations cannot be modified.
 
 
-* Workers may receive messages from the server, but cannot send messages to the server. Moreover, workers can send messages to clients.
+* Workers may receive messages from the server. Moreover, workers can send messages to clients and the server.
 
 ## Running the code
 
