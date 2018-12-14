@@ -80,6 +80,8 @@ The minimum elements of the server state are: the minimum `min` and maximum `max
 
 * The server may receive messages from clients but cannot send messages to clients.
 
+* The server may receive messages from its workers.
+
 * The amount of workers depends on the submitted tasks. At any point in time there can be at most `max` workers and at least `min` workers. When a task is submitted, if there are no available workers and the number of active workers is equal to `max` a new worker may be created. Also, every `tick` seconds, the amount of idle workers must be revised, if the number of idle workers is greater than `min`, then a worker must be terminated.
 
 * If a task request is received, the amount of active workers is equal to `max`, and none of the workers can currently work on the task, then the task must be set as pending.
